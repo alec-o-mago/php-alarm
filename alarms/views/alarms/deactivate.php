@@ -7,5 +7,4 @@ try {
     $_SESSION['message'] = 'Erro ao desativar alarme: ' + $e->getMessage();
 }
 
-
 header('Location:index.php?entity=alarm');

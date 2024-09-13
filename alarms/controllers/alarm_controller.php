@@ -77,10 +77,10 @@ class AlarmController {
             $result2 = $stmt2->execute([$id, 'Entrada']);
             $logController->store("John Doe", "alarm", "activate");
             // Mandar email se for urgente
-            $alarm = $this->get($id);
-            if ($alarm['type']=='Urgente') {
-                $emailManager->sendUrgentAlarmEmail($alarm['name'], $alarm['equipment_name']);
-            }
+            // $alarm = $this->get($id);
+            // if ($alarm['type']=='Urgente') {
+            //     $emailManager->sendUrgentAlarmEmail($alarm['name'], $alarm['equipment_name']);
+            // }
         }
         return $result1;
     }
