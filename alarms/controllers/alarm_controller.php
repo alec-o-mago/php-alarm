@@ -65,16 +65,22 @@ class AlarmController {
         return $result;
     }
 
-    // Ativar Alarme
+    // Ativar Alarme (e mandar email se for urgente)
     public function activate($id) {
         global $pdo;
         global $logController;
+        global $emailManager;
         $stmt1 = $pdo->prepare("UPDATE alarms SET status = ? WHERE id = ? AND status = 'off'");
-        $result1 = $stmt1->execute(['on',$id]);
+        $result1 = $stmt1->execute(['on', $id]);
         if ($stmt1->rowCount() > 0) {
             $stmt2 = $pdo->prepare('INSERT INTO alarm_actuations(alarm_id, type) VALUES (?, ?)');
             $result2 = $stmt2->execute([$id, 'Entrada']);
             $logController->store("John Doe", "alarm", "activate");
+            // Mandar email se for urgente
+            $alarm = $this->get($id);
+            if ($alarm['type']=='Urgente') {
+                $emailManager->sendUrgentAlarmEmail($alarm['name'], $alarm['equipment_name']);
+            }
         }
         return $result1;
     }

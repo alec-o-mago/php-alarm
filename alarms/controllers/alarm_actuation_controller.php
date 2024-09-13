@@ -31,8 +31,8 @@ class AlarmActuationController {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Buscar por Nome
-    public function search($name) {
+    // Buscar Atuação de Alarme por Nome
+    public function searchByName($name) {
         global $pdo;
         try {
             $stmt = $pdo->prepare("
@@ -42,6 +42,56 @@ class AlarmActuationController {
                 LEFT JOIN equipments e ON a.equipment_id = e.id
                 WHERE a.name LIKE :name
             ");
+            $stmt->bindValue( ':name', "%$name%", PDO::PARAM_STR);
+            $result = $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch(PDOException $e) {
+            return $e->getMessage();
+        }
+    }
+
+    // Buscar Atuação de Alarme por Ordem
+    public function searchByOrder($orderby = 'id') {
+        global $pdo;
+        // Verificando valores válidos de $orderby por segurança
+        $validOrderColumns = ['id', 'alarm_name', 'equipment_name', 'type', 'created_at'];
+        if (!in_array($orderby, $validOrderColumns)) {
+            $orderby = 'id'; // Volta a ser 'id' se for inválido
+        }
+        try {
+            $stmt = $pdo->prepare("
+                SELECT aa.*, a.name as alarm_name, e.name as equipment_name
+                FROM alarm_actuations aa
+                LEFT JOIN alarms a ON aa.alarm_id = a.id
+                LEFT JOIN equipments e ON a.equipment_id = e.id
+                ORDER BY $orderby
+            ");
+            // A variavel $orderby não pode ser inserida com bindValue() mas foi verificada por segurança acima.
+            $result = $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch(PDOException $e) {
+            return $e->getMessage();
+        }
+    }
+
+    // Buscar Atuação de Alarme por Nome e Ordem
+    public function searchByOrderAndName($name, $orderby = 'id') {
+        global $pdo;
+        // Verificando valores válidos de $orderby por segurança
+        $validOrderColumns = ['id', 'alarm_name', 'equipment_name', 'type', 'created_at'];
+        if (!in_array($orderby, $validOrderColumns)) {
+            $orderby = 'id'; // Volta a ser 'id' se for inválido
+        }
+        try {
+            $stmt = $pdo->prepare("
+                SELECT aa.*, a.name as alarm_name, e.name as equipment_name
+                FROM alarm_actuations aa
+                LEFT JOIN alarms a ON aa.alarm_id = a.id
+                LEFT JOIN equipments e ON a.equipment_id = e.id
+                WHERE a.name LIKE :name
+                ORDER BY $orderby
+            ");
+            // A variavel $orderby não pode ser inserida com bindValue() mas foi verificada por segurança acima.
             $stmt->bindValue( ':name', "%$name%", PDO::PARAM_STR);
             $result = $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
